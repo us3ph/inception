@@ -1,7 +1,7 @@
 # FROM... instruction that defines the base image for all subsequent instructions in that build stage. 
 
-#start with debian Buster (stable linux version)
-FROM debian:buster
+#start with debian Bullseye (stable linux version)
+FROM debian:bullseye
 
 #update package list and install MariaDB
 RUN apt-get update -y && \

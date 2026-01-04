@@ -1,5 +1,5 @@
-#start with Debian Buster (stable linux version)
-FROM debian:buster
+#start with Debian Bullseye (stable linux version)
+FROM debian:bullseye
 
 #install Nginx and OpenSSL
 #Nginx is the web server, OpenSSL tool to create SSL certificates (for HTTPS)

@@ -1,0 +1,295 @@
+version: '3.8'
+
+#services (our containers)
+
+services:
+
+  #mariadb - database
+  mariadb:
+    # containers name (what i have to see when run 'docker ps')
+    container_name: mariadb
+
+    #build from our Dockerfile
+    build:
+      context: ./requirements/mariadb
+      dockerfile: Dockerfile
+
+    #load env variables from .env file
+    env_file:
+      - .env
+    #mount secret files into the containers
+    secrets:
+      - db_password
+      - db_root_password
+
+    #presistent storage (data survives container restart)
+    volumes:
+      - mariadb_data:/var/lib/mysql/
+    #connect to our private network
+    networks:
+      - inception
+    #always restart the container if it crashes
+    restart: always
+
+  #wordpress - the application
+  wordpress:
+    container_name: wordpress
+
+    build:
+      context: ./requirements/wordpress
+      dockerfile: Dockerfile
+
+    env_file:
+      - .env
+
+    secrets:
+      - credentials
+
+    volumes:
+      - wordpress_data:/var/www/html/
+
+    networks:
+      - inception
+
+    # wait fot mariadb to start first
+    depends_on:
+      - mariadb
+
+    restart: always
+
+
+  #nginx - web server
+  nginx:
+    container_name: nginx
+
+    build:
+      context: ./requirements/nginx
+      dockerfile: Dockerfile
+
+    env_file:
+      - .env
+
+    #expose port 443 to the host machine
+    ports:
+      - "443:443"
+
+    #share worpress files with nginx
+    volumes:
+      - wordpress_data:/var/www/html/
+
+    networks:
+      - inception
+
+    #wait for wordpress to be ready
+    depends_on:
+      - wordpress
+
+    restart: always
+
+
+#volumes (persistent storage)
+volumes:
+  #mariadb data (database files)
+  mariadb_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/${USER}/data/mariadb
+
+  #wordpress data (website files php files)
+  wordpress_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/${USER}/data/wordpress
+
+
+#network (how containers communicate)
+networks:
+  inception:
+    driver: bridge
+
+
+#secrets (sensitive data)
+secrets:
+  db_password:
+    file: ../secrets/db_password.txt
+  db_root_password:
+    file: ../secrets/db_root_password.txt
+  credentials:
+    file: ../secrets/credentials.txt
+
+
+
+
+
+
+
+#     services:
+#     mariadb:
+#       container_name: mariadb
+#       build:
+#         context: ./requirements/mariadb
+#         dockerfile: Dockerfile
+#
+#   services: - List of containers to create
+#   mariadb: - Name of the service (used for DNS)
+#   container_name: - Actual container name in Docker
+#   build: - Build from our Dockerfile
+#     context: - Where to find the Dockerfile
+#     dockerfile: - Which file to use (usually just "Dockerfile")
+
+
+
+
+#   wordpress:
+#     depends_on:
+#       - mariadb
+#
+#   nginx:
+#     depends_on:
+#       - wordpress
+#   ```
+#
+#   **This creates a startup order:**
+#   ```
+#   1. Start mariadb first
+#      ↓
+#   2. Then start wordpress (waits for mariadb)
+#      ↓
+#   3. Then start nginx (waits for wordpress)
+
+#Important: depends_on only waits for the container to start, not to be ready. That's why we have the until mariadb loop in our WordPress setup script!
+
+
+
+
+
+
+#  volumes:
+#    mariadb_data:
+#      driver: local
+#      driver_opts:
+#        type: none
+#        o: bind
+#        device: /home/${USER}/data/mariadb
+#  ```
+#
+#  **Visual explanation:**
+#  ```
+#  Your Computer                  Container
+#  /home/user/data/mariadb   ←→   /var/lib/mysql
+#       (Host)                    (Container)
+#  ```
+#
+#  **Why do we need this?**
+#
+#  Without volumes:
+#  ```
+#  1. Container creates database files
+#  2. You stop the container
+#  3. You start it again
+#  4. Database is empty! ❌ (data lost)
+#  ```
+#
+#  With volumes:
+#  ```
+#  1. Container creates database files → saved to host
+#  2. You stop the container
+#  3. You start it again
+#  4. Database is still there! ✅ (data persists)
+
+
+
+
+
+#   networks:
+#     inception:
+#       driver: bridge
+#   ```
+#
+#   Networks let containers talk to each other:
+#
+#   **Without a network:**
+#   ```
+#   MariaDB: "I'm at 172.17.0.2"
+#   WordPress: "Where are you? I can't find you!" ❌
+#   ```
+#
+#   **With a network:**
+#   ```
+#   MariaDB: "I'm on the 'inception' network"
+#   WordPress: "Hey mariadb, are you there?"
+#   MariaDB: "Yes! Here's your data!" ✅
+
+#   Docker creates DNS automatically:
+#
+#   Container name = hostname
+#   mariadb → resolves to MariaDB container's IP
+#   wordpress → resolves to WordPress container's IP
+#
+#   Bridge driver:
+#
+#   Creates an isolated network
+#   Containers can talk to each other
+#   Containers can reach the internet
+#   Host can't access containers (except through exposed ports)
+
+
+
+
+
+
+
+#   secrets:
+#     db_password:
+#       file: ../secrets/db_password.txt
+#   ```
+#
+#   Secrets are **secure way to pass sensitive data** to containers.
+#
+#   **How it works:**
+#   ```
+#   1. Docker reads ../secrets/db_password.txt
+#   2. Mounts it to /run/secrets/db_password in the container
+#   3. Your script reads: cat /run/secrets/db_password
+#   4. File is only readable by the container (secure!)
+
+#Why not just use environment variables?
+
+#  Environment variables:
+#  docker inspect wordpress
+#  # Shows: MYSQL_PASSWORD=mypassword123
+#  # ❌ Anyone can see it!
+#
+#  Secrets:
+#  docker inspect wordpress
+#  # Shows: /run/secrets/db_password
+#  # ✅ File path, not the actual password!
+
+
+
+
+#  nginx:
+#    ports:
+#      - "443:443"
+#  ```
+#
+#  **This means:**
+#  ```
+#  Host port 443  →  Container port 443
+#      ↓                    ↓
+#  Your computer        Nginx container
+#  ```
+#
+#  **Visual explanation:**
+#  ```
+#  Internet
+#     ↓
+#  Your Computer (port 443)
+#     ↓
+#  Docker forwards to → Nginx container (port 443)
+#     ↓
+#  Nginx handles the request

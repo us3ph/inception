@@ -1,23 +1,23 @@
-FROM debian:buster
+FROM debian:bullseye
 
 #install php and required extensions
 RUN apt-get update -y && \
     apt-get update -y && \
     apt-get install -y \
-    php7.3-fpm \
-    php7.3-mysql \
-    php7.3-cli \
-    php7.3-curl \
-    php7.3-gd \
-    php7.3-mbstring \
-    php7.3-xml \
-    php7.3-zip \
+    php7.4-fpm \
+    php7.4-mysql \
+    php7.4-cli \
+    php7.4-curl \
+    php7.4-gd \
+    php7.4-mbstring \
+    php7.4-xml \
+    php7.4-zip \
     curl \
     wget \
     mariadb-client
 
 #copy PHP-FPM configuration
-COPY conf/www.conf /etc/php/7.3/fpm/pool.d/www.conf
+COPY conf/www.conf /etc/php/7.4/fpm/pool.d/www.conf
 
 #copy setup script
 COPY tools/wordpress-setup.sh /usr/local/bin/
@@ -33,7 +33,7 @@ EXPOSE 9000
 ENTRYPOINT ["wordpress-setup.sh"]
 
 #keep PHP-FPM running in foreground
-CMD ["php-fpm7.3", "-F"]
+CMD ["php-fpm7.4", "-F"]
 
 
 
