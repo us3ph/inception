@@ -1,4 +1,4 @@
-# FROM... instruction that defines the base image for all subsequent instructions in that build stage. 
+# FROM... instruction that defines the base image for all subsequent instructions in that build stage.
 
 #start with debian Bullseye (stable linux version)
 FROM debian:bullseye

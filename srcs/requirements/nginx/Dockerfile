@@ -39,13 +39,13 @@ CMD ["nginx", "-g", "daemon off;"]
 
 
 # Before we create the config, let's understand **why we need SSL**:
-# 
+#
 # **Without SSL (HTTP):**
 # ```
 # Your Computer → "password123" → Server
 #                 ↑ Anyone can read this!
 # ```
-# 
+#
 # **With SSL (HTTPS):**
 # ```
 # Your Computer → "jK8#mP2$qL9" (encrypted) → Server
