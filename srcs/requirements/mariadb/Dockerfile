@@ -8,6 +8,11 @@ RUN apt-get update -y && \
     apt-get update -y && \
     apt-get install -y mariadb-server mariadb-client
 
+#create necessary directories and set permissions
+RUN mkdir -p /run/mysqld && \
+    chown -R mysql:mysql /run/mysqld && \
+    chmod 755 /run/mysqld
+
 #copy our configuration file into the container
 COPY conf/50-server.cnf /etc/mysql/mariadb.conf.d/50-server.cnf
 

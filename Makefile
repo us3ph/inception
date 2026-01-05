@@ -44,16 +44,10 @@ clean: down
 
 #full cleanup including data
 fclean: clean
-	@read -p "Are you sure? [y/N] " -n 1 -r; \
-	echo; \
-	if [[ $$REPLY != "n" ]]; then \
-		sudo rm -rf $(DATA_PATH)/wordpress/*; \
-		sudo rm -rf $(DATA_PATH)/mariadb/*; \
-		docker volume rm $$(docker volume ls -q) 2>/dev/null || true; \
-		echo "✓ full cleanup complete"; \
-	else
-		echo "cleanup cancelled$(NC)"; \
-	fi
+	sudo rm -rf $(DATA_PATH)/wordpress/*; \
+	sudo rm -rf $(DATA_PATH)/mariadb/*; \
+	docker volume rm $$(docker volume ls -q) 2>/dev/null || true; \
+	echo "✓ full cleanup complete"; \
 
 #rebuild everything
 re: fclean all

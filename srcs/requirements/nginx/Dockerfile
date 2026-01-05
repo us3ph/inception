@@ -5,7 +5,7 @@ FROM debian:bullseye
 #Nginx is the web server, OpenSSL tool to create SSL certificates (for HTTPS)
 RUN apt-get update -y && \
     apt-get update -y && \
-    apt-get install -y nginx openssl
+    apt-get install -y nginx openssl gettext-base
 
 #copy our Nginx configuration file
 COPY conf/nginx.conf /etc/nginx/sites-available/default

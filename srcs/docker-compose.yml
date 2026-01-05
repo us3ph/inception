@@ -43,7 +43,9 @@ services:
       - .env
 
     secrets:
-      - credentials
+      - db_password
+      - source: credentials
+        target: wordpress_credentials
 
     volumes:
       - wordpress_data:/var/www/html/
@@ -51,7 +53,7 @@ services:
     networks:
       - inception
 
-    # wait fot mariadb to start first
+    # wait for mariadb to start first
     depends_on:
       - mariadb
 
@@ -137,14 +139,14 @@ secrets:
 #   services: - List of containers to create
 #   mariadb: - Name of the service (used for DNS)
 #   container_name: - Actual container name in Docker
-#   build: - Build from our Dockerfile
-#     context: - Where to find the Dockerfile
+#   build: - Build from our Dockerfi
 #     dockerfile: - Which file to use (usually just "Dockerfile")
 
 
 
 
-#   wordpress:
+#   wordpress:le
+#     context: - Where to find the Dockerfile
 #     depends_on:
 #       - mariadb
 #

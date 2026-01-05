@@ -30,7 +30,7 @@ if [ ! -f /usr/local/bin/wp ]; then
 fi
 
 #check if WordPress is already installed
-if [ !-f wp-config.php ]; then
+if [ ! -f wp-config.php ]; then
     echo "downloading WordPress..."
     wp core download --allow-root
 
@@ -40,6 +40,16 @@ if [ !-f wp-config.php ]; then
         --dbuser="${MYSQL_USER}" \
         --dbpass="${DB_PASSWORD}" \
         --dbhost=mariadb:3306 \
+        --allow-root
+
+    echo "installing WordPress..."
+    wp core install \
+        --url="${DOMAIN_NAME}" \
+        --title="${WP_TITLE}" \
+        --admin_user="${WP_ADMIN_USER}" \
+        --admin_password="${WP_ADMIN_PASSWORD}" \
+        --admin_email="${WP_ADMIN_EMAIL}" \
+        --skip-email \
         --allow-root
 
     echo "creating additional user..."
@@ -54,7 +64,7 @@ if [ !-f wp-config.php ]; then
     echo "wordpress installation complete"
 else
     echo "WordPress is already installed"
-fi  
+fi
 echo "staring PHP-FPM..."
 
 #start PHP-FPM (the CMD from Dockerfile will run)
@@ -92,11 +102,11 @@ exec "$@"
 #  │  (port 443)  │            │  (port 3306)    │
 #  └──────────────┘            └─────────────────┘
 #  ```
-#  
+#
 #  ---
-#  
+#
 #  ## **Understanding the Complete Flow**
-#  
+#
 #  Let me show you what happens when a user visits your WordPress site:
 #  ```
 #  1. User types: https://login.42.fr

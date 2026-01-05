@@ -2,15 +2,22 @@
 
 echo "starting MariaDB setup..."
 
-#start MySQL temporarily to cnfigure it
-service mysql start
+#initialize MariaDB data directory if needed
+if [ ! -d "/var/lib/mysql/mysql" ]; then
+    echo "initializing MariaDB data directory..."
+    mysql_install_db --user=mysql --datadir=/var/lib/mysql
+fi
+
+#start MySQL temporarily to configure it
+mysqld --user=mysql --datadir=/var/lib/mysql &
+MYSQL_PID=$!
 sleep 3
 
-#wail until mysql is ready to accept commands
+#wait until mysql is ready to accept commands
 
 echo "waiting for MySQL to be ready..."
 
-unlti mysqladmin ping &>/dev/null 2>&1; do
+until mysqladmin ping &>/dev/null 2>&1; do
     sleep 1
 done
 echo "MySQL is ready!"
@@ -32,12 +39,13 @@ EOF
 
 echo "database setup completed"
 
-#stop the temporarily MySQL service
-mysqladmin -u root -p${DB_PASSWORD} shutdown
+#stop the temporary MySQL service
+kill $MYSQL_PID
+wait $MYSQL_PID 2>/dev/null
 
 #start MySQL properly (this keep container running)
 echo "starting MariaDB in foreground..."
-exec mysqld
+exec mysqld --user=mysql --datadir=/var/lib/mysql
 
 
 #1. **Starts MySQL temporarily** - We need it running to configure it
