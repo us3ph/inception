@@ -17,7 +17,7 @@ up:
 	@docker-compose -f $(COMPOSE_FILE) up -d
 
 down:
-	@docker-compose -f $(COMPOSE_FILE) down
+	@docker-compose -f $(COMPOSE_FILE) down 2>/dev/null || true
 
 #stop containers without removing
 stop:
@@ -44,7 +44,7 @@ clean: down
 
 #full cleanup including data
 fclean: clean
-	sudo rm -rf $(DATA_PATH)/wordpress/*; \
+	@sudo rm -rf $(DATA_PATH)/wordpress/*; \
 	sudo rm -rf $(DATA_PATH)/mariadb/*; \
 	docker volume rm $$(docker volume ls -q) 2>/dev/null || true; \
 	echo "✓ full cleanup complete"; \

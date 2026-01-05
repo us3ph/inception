@@ -8,9 +8,10 @@ cd /var/www/html/
 #read password from secret file
 DB_PASSWORD=$(cat /run/secrets/db_password)
 
-#extract admin password from credentials file
-
+#extract admin and user credentials from credentials file
+WP_ADMIN_USER=$(grep WORDPRESS_ADMIN= /run/secrets/wordpress_credentials | grep -v PASSWORD | cut -d '=' -f2)
 WP_ADMIN_PASSWORD=$(grep WORDPRESS_ADMIN_PASSWORD /run/secrets/wordpress_credentials | cut -d '=' -f2)
+WP_USER=$(grep WORDPRESS_USER= /run/secrets/wordpress_credentials | grep -v PASSWORD | cut -d '=' -f2)
 WP_USER_PASSWORD=$(grep WORDPRESS_USER_PASSWORD /run/secrets/wordpress_credentials | cut -d '=' -f2)
 
 echo "checking if MariaDB is ready..."
