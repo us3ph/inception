@@ -12,6 +12,7 @@ RUN apt-get update -y && \
     php7.4-mbstring \
     php7.4-xml \
     php7.4-zip \
+    php7.4-redis \
     curl \
     wget \
     mariadb-client

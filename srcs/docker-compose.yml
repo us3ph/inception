@@ -53,9 +53,10 @@ services:
     networks:
       - inception
 
-    # wait for mariadb to start first
+    # wait for mariadb and redis(to enable object caching for bonus) to start first
     depends_on:
       - mariadb
+      - redis
 
     restart: always
 
@@ -82,12 +83,77 @@ services:
     networks:
       - inception
 
-    #wait for wordpress to be ready
+    #wait for wordpress and adminer to be ready
     depends_on:
       - wordpress
+      - adminer
 
     restart: always
 
+  ######### bonus services #########
+
+  #redis - cache for wordpress
+  redis:
+    container_name: redis
+    build:
+      context: ./requirements/bonus/redis
+      dockerfile: Dockerfile
+    networks:
+      - inception
+    restart: always
+
+  #ftp - file transfer protocol for wordpress files
+  ftp:
+    container_name: ftp
+    build:
+      context: ./requirements/bonus/ftp
+      dockerfile: Dockerfile
+    ports:
+      - "21:21"
+      - "21100-21110:21100-21110"
+    volumes:
+      - wordpress_data:/var/www/html/
+    networks:
+      - inception
+    restart: always
+
+  #adminer - database management GUI
+  adminer:
+    container_name: adminer
+    build:
+      context: ./requirements/bonus/adminer
+      dockerfile: Dockerfile
+    networks:
+      - inception
+    restart: always
+
+  #static_site - showcase static website
+  static_site:
+    container_name: static_site
+    build:
+      context: ./requirements/bonus/static_site
+      dockerfile: Dockerfile
+    networks:
+      - inception
+    restart: always
+
+  #portainer - docker management GUI
+  portainer:
+    container_name: portainer
+    build:
+      context: ./requirements/bonus/portainer
+      dockerfile: Dockerfile
+    ports:
+      - "9000:9000"
+      - "9443:9443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    networks:
+      - inception
+    restart: always
+
+  ####################################
 
 #volumes (persistent storage)
 volumes:
@@ -106,6 +172,14 @@ volumes:
       type: none
       o: bind
       device: /home/${USER}/data/wordpress
+
+  #portainer data (portainer configuration and database)
+  portainer_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/${USER}/data/portainer
 
 
 #network (how containers communicate)

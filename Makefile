@@ -8,6 +8,7 @@ all: setup build up
 setup:
 	@mkdir -p $(DATA_PATH)/wordpress
 	@mkdir -p $(DATA_PATH)/mariadb
+	@mkdir -p $(DATA_PATH)/portainer
 
 #build all docker images
 build:
@@ -46,6 +47,7 @@ clean: down
 fclean: clean
 	@sudo rm -rf $(DATA_PATH)/wordpress/*; \
 	sudo rm -rf $(DATA_PATH)/mariadb/*; \
+	sudo rm -rf $(DATA_PATH)/portainer/*; \
 	docker volume rm $$(docker volume ls -q) 2>/dev/null || true; \
 	echo "✓ full cleanup complete"; \
 

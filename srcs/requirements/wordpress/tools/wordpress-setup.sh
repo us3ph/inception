@@ -62,6 +62,18 @@ if [ ! -f wp-config.php ]; then
     echo "installing and activating theme..."
     wp theme install astra --activate --allow-root
 
+    echo "installing Redis object cache plugin..."
+    wp plugin install redis-cache --activate --allow-root
+
+    echo "configuring Redis in wp-config.php..."
+    # Add Redis configuration to wp-config.php
+    wp config set WP_REDIS_HOST redis --allow-root
+    wp config set WP_REDIS_PORT 6379 --raw --allow-root
+    wp config set WP_CACHE true --raw --allow-root
+
+    echo "enabling Redis object cache..."
+    wp redis enable --allow-root
+
     echo "wordpress installation complete"
 else
     echo "WordPress is already installed"
