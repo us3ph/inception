@@ -1,10 +1,9 @@
-#start with Debian Bullseye (stable linux version)
-FROM debian:bullseye
+# current stable version of Debian
+FROM debian:trixie
 
 #install Nginx and OpenSSL
 #Nginx is the web server, OpenSSL tool to create SSL certificates (for HTTPS)
 RUN apt-get update -y && \
-    apt-get update -y && \
     apt-get install -y nginx openssl gettext-base
 
 #copy our Nginx configuration file

@@ -13,8 +13,6 @@ mysqld --user=mysql --datadir=/var/lib/mysql &
 MYSQL_PID=$!
 sleep 3
 
-#wait until mysql is ready to accept commands
-
 echo "waiting for MySQL to be ready..."
 
 until mysqladmin ping &>/dev/null 2>&1; do

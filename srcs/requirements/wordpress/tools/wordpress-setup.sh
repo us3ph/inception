@@ -59,9 +59,6 @@ if [ ! -f wp-config.php ]; then
         --user_pass="${WP_USER_PASSWORD}" \
         --allow-root
 
-    echo "installing and activating theme..."
-    wp theme install astra --activate --allow-root
-
     echo "installing Redis object cache plugin..."
     wp plugin install redis-cache --activate --allow-root
 

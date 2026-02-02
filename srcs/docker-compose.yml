@@ -108,6 +108,9 @@ services:
     build:
       context: ./requirements/bonus/ftp
       dockerfile: Dockerfile
+      args:
+        FTP_USER: ${FTP_USER}
+        FTP_PASSWORD: ${FTP_PASSWORD}
     ports:
       - "21:21"
       - "21100-21110:21100-21110"
@@ -123,16 +126,21 @@ services:
     build:
       context: ./requirements/bonus/adminer
       dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
     networks:
       - inception
     restart: always
 
-  #static_site - showcase static website
+  #static_site - showcase static website (accessible at localhost:9090)
   static_site:
     container_name: static_site
     build:
       context: ./requirements/bonus/static_site
       dockerfile: Dockerfile
+    #expose port 9090 to the host machine for independent access
+    ports:
+      - "9090:8080"
     networks:
       - inception
     restart: always

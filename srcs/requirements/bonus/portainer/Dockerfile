@@ -1,4 +1,4 @@
-FROM alpine:3.18
+FROM alpine:3.23
 
 #install dependencies
 RUN apk update && apk add --no-cache wget tar ca-certificates
