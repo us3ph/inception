@@ -2,13 +2,10 @@
 
 echo "starting WordPress setup..."
 
-#change to wordpress directory
 cd /var/www/html/
 
-#read password from secret file
 DB_PASSWORD=$(cat /run/secrets/db_password)
 
-#extract admin and user credentials from credentials file
 WP_ADMIN_USER=$(grep WORDPRESS_ADMIN= /run/secrets/wordpress_credentials | grep -v PASSWORD | cut -d '=' -f2)
 WP_ADMIN_PASSWORD=$(grep WORDPRESS_ADMIN_PASSWORD /run/secrets/wordpress_credentials | cut -d '=' -f2)
 WP_USER=$(grep WORDPRESS_USER= /run/secrets/wordpress_credentials | grep -v PASSWORD | cut -d '=' -f2)
@@ -21,7 +18,6 @@ until mariadb -h mariadb -u "${MYSQL_USER}" -p"${DB_PASSWORD}" -e "SELECT 1" >/d
 done
 echo "MariaDB is ready"
 
-#download WP-CLI if not already present
 if [ ! -f /usr/local/bin/wp ]; then
     echo "downloading WP-CLI..."
     curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
@@ -30,7 +26,6 @@ if [ ! -f /usr/local/bin/wp ]; then
     echo "WP-CLI installed"
 fi
 
-#check if WordPress is already installed
 if [ ! -f wp-config.php ]; then
     echo "downloading WordPress..."
     wp core download --allow-root
@@ -63,7 +58,7 @@ if [ ! -f wp-config.php ]; then
     wp plugin install redis-cache --activate --allow-root
 
     echo "configuring Redis in wp-config.php..."
-    # Add Redis configuration to wp-config.php
+
     wp config set WP_REDIS_HOST redis --allow-root
     wp config set WP_REDIS_PORT 6379 --raw --allow-root
     wp config set WP_CACHE true --raw --allow-root
@@ -77,66 +72,4 @@ else
 fi
 echo "staring PHP-FPM..."
 
-#start PHP-FPM (the CMD from Dockerfile will run)
 exec "$@"
-
-
-
-
-
-
-#  ## **Visual Summary: How Everything Works Together**
-#  ```
-#  ┌──────────────────────────────────────────────┐
-#  │          WORDPRESS CONTAINER                 │
-#  ├──────────────────────────────────────────────┤
-#  │                                              │
-#  │  1. wordpress-setup.sh runs:                │
-#  │     ├─ Wait for MariaDB ⏳                  │
-#  │     ├─ Download WP-CLI 📥                   │
-#  │     ├─ Download WordPress 📦                │
-#  │     ├─ Create wp-config.php ⚙️              │
-#  │     ├─ Install WordPress 🔧                 │
-#  │     ├─ Create users 👤                      │
-#  │     └─ Install theme 🎨                     │
-#  │                                              │
-#  │  2. PHP-FPM starts (port 9000)              │
-#  │     └─ Waits for requests from Nginx        │
-#  │                                              │
-#  └──────────────────────────────────────────────┘
-#           ↑                           ↓
-#           │ PHP files                 │ SQL queries
-#           │                           │
-#  ┌────────┴─────┐            ┌────────┴────────┐
-#  │    NGINX     │            │    MARIADB      │
-#  │  (port 443)  │            │  (port 3306)    │
-#  └──────────────┘            └─────────────────┘
-#  ```
-#
-#  ---
-#
-#  ## **Understanding the Complete Flow**
-#
-#  Let me show you what happens when a user visits your WordPress site:
-#  ```
-#  1. User types: https://login.42.fr
-#     ↓
-#  2. Browser connects to Nginx on port 443 (HTTPS)
-#     ↓
-#  3. Nginx sees it's the homepage, requests index.php
-#     ↓
-#  4. Nginx sends request to wordpress:9000 (PHP-FPM)
-#     ↓
-#  5. PHP-FPM executes index.php
-#     ↓
-#  6. WordPress needs post data, queries mariadb:3306
-#     ↓
-#  7. MariaDB returns post data
-#     ↓
-#  8. WordPress generates HTML
-#     ↓
-#  9. PHP-FPM sends HTML to Nginx
-#     ↓
-#  10. Nginx sends encrypted HTML to user's browser
-#     ↓
-#  11. User sees their WordPress site! 🎉
